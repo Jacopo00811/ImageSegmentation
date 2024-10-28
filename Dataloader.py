@@ -3,6 +3,7 @@ import glob
 import PIL.Image as Image
 import torch
 from sklearn.model_selection import train_test_split
+from annotations import add_weak
 
 
 class DRIVE(torch.utils.data.Dataset):
@@ -75,3 +76,15 @@ class PH2(torch.utils.data.Dataset):
             lesion = self.transform(lesion)
 
         return image, lesion
+    
+    def get_annotated(self, idx, num_positive, num_negative):
+        image_path, lesion_path = self.data[idx]
+
+        image = Image.open(image_path).convert("RGB")
+        lesion = Image.open(lesion_path).convert("L")
+
+        if self.transform:
+            image = self.transform(image)
+            lesion = self.transform(lesion)
+        
+        return add_weak(image, lesion, num_positive, num_negative)
