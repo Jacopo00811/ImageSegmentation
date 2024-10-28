@@ -30,4 +30,32 @@ def focal_loss(y_real, y_pred, gamma_2=2.0):
     
     return torch.mean(focal_loss)
 
+import torch
+
+def point_loss(y_pred, y_true, pos_points, neg_points):
+    """
+    Compute the point loss.
+
+    :param y_pred: Tensor of predicted scores (N, C)
+    :param y_true: Tensor of ground truth labels (N,) 
+    :param pos_points: Tensor of positive point indices
+    :param neg_points: Tensor of negative point indices
+    :return: Computed point loss
+    """
+    # Gather ground truth labels at point locations
+    pos_labels = y_true[pos_points]
+    neg_labels = y_true[neg_points]
+
+    # Gather predictions at point locations
+    pos_predictions = y_pred[pos_points, pos_labels]  # Predictions for positive points
+    neg_predictions = y_pred[neg_points, neg_labels]  # Predictions for negative points
+
+    # Concatenate predictions
+    predictions = torch.cat([pos_predictions, neg_predictions])
+
+    # Calculate loss (using appropriate loss function like cross-entropy)
+    loss = -torch.mean(torch.log(predictions + 1e-8))  # Adding epsilon for numerical stability
+
+    return loss
+
 # Test
